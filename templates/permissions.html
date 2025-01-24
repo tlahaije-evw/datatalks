@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beheer Datasettoegang</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Header -->
+    {% include 'partials/header.html' %}
+    
+    <div class="container mt-5">
+        <h1>Beheer Datasettoegang</h1>
+        <form method="POST" action="/admin/permissions">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Gebruiker / Dataset</th>
+                        {% for dataset in datasets %}
+                        <th>{{ dataset.name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.firstname }} {{ user.lastname }}</td>
+                        {% for dataset in datasets %}
+                        <td>
+                            <input type="checkbox" name="{{ user.id }}" value="{{ dataset.id }}"
+                                {% if permission_map.get((user.id, dataset.id), False) %} checked {% endif %}>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary">Opslaan</button>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    {% include 'partials/footer.html' %}
+</body>
+
+</html>

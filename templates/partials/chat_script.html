@@ -1,0 +1,68 @@
+<script>
+    const form = document.querySelector('form[action="/send_message"]');
+    const chatBox = document.querySelector('.chat-box');
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault(); // Voorkom standaardformulierverzending
+
+        const formData = new FormData(form);
+        const response = await fetch('/send_message', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+
+            // Voeg het gebruikersbericht toe aan de chatbox
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message text-end mb-3';
+            userMessageDiv.innerHTML = `
+                <div class="bg-primary text-white p-2 rounded">
+                    ${result.user_message.content}
+                </div>
+                <small class="text-muted">${result.user_message.timestamp}</small>
+            `;
+            chatBox.appendChild(userMessageDiv);
+
+            // Scroll naar de onderkant van de chatbox
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Voeg een laadindicator toe voor de AI-reactie
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message mb-3';
+            loadingDiv.id = 'loading-indicator';
+            loadingDiv.innerHTML = `
+                <div class="bg-light p-2 rounded">...</div>
+                <small class="text-muted">De AI reageert...</small>
+            `;
+            chatBox.appendChild(loadingDiv);
+
+            // Wacht op de AI-reactie
+            setTimeout(() => {
+                // Verwijder de laadindicator
+                const loadingIndicator = document.getElementById('loading-indicator');
+                if (loadingIndicator) loadingIndicator.remove();
+
+                // Voeg de AI-reactie toe aan de chatbox
+                const aiMessageDiv = document.createElement('div');
+                aiMessageDiv.className = 'message mb-3';
+                aiMessageDiv.innerHTML = `
+                    <div class="bg-light p-2 rounded">
+                        ${result.ai_message.content}
+                    </div>
+                    <small class="text-muted">${result.ai_message.timestamp}</small>
+                `;
+                chatBox.appendChild(aiMessageDiv);
+
+                // Scroll naar de onderkant
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 5000); // Simuleer AI-verwerkingstijd
+        } else {
+            alert('Er is een fout opgetreden bij het verzenden van je bericht.');
+        }
+    });
+</script>
+
+
+

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Datasets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        .container-fluid,
+        .row,
+        .sidebar,
+        main {
+            height: 100%;
+        }
+
+        .sidebar {
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    {% include 'partials/header.html' %}
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <h5 class="px-3">Recente Gesprekken</h5>
+                    <ul class="nav flex-column mb-3">
+                        {% for gesprek in chats %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/chat/{{ gesprek.id }}">
+                                {{ gesprek.title }}<br>
+                                <small class="text-muted">{{ gesprek.laatste_bericht }}</small>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <h5 class="px-3">Datasets</h5>
+                    <ul class="nav flex-column">
+                        {% for dataset in datasets %}
+                        <li class="nav-item">
+                            <form action="/start_chat" method="POST">
+                                <input type="hidden" name="dataset_path" value="{{ dataset.path }}">
+                                <button type="submit" class="btn btn-link nav-link">{{ dataset.name }}</button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="mt-4 px-3">
+                        <button class="btn btn-primary w-100 mb-2">Nieuw Gesprek</button>
+                        <button class="btn btn-secondary w-100">Uitloggen</button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
+                <div class="chat-container py-4">
+                    <div class="chat-box border rounded-3 p-3 mb-4" style="height: 400px; overflow-y: auto;">
+                        {% for message in messages %}
+                        <div class="message {{ 'text-end' if message.sender == 'user' else '' }} mb-3">
+                            <div
+                                class="{{ 'bg-primary text-white' if message.sender == 'user' else 'bg-light' }} p-2 rounded">
+                                {{ message.content }}
+                            </div>
+                            <small class="text-muted">{{ message.timestamp }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <form action="/send_message" method="POST" class="d-flex">
+                        <input type="hidden" name="chat_id" value="{{ chat.id }}">
+                        <input type="hidden" name="sender" value="user">
+                        <div class="input-group me-3">
+                            <input type="text" class="form-control" name="content" placeholder="Typ hier je vraag...">
+                            <button class="btn btn-primary">Stuur</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Dataset preview -->
+                <div>
+                    <button class="btn btn-primary mb-3" id="toggle-preview-button">Toon/Verberg Dataset Preview</button>
+                    <button class="btn btn-secondary mb-3" id="toggle-preview-button">Toon/Verberg Grafiek</button>
+                </div>
+
+                <!-- Dataset preview -->
+                <div id="dataset-preview" class="dataset-preview mb-4" style="display: none;">
+                    <h5>Dataset Preview</h5>
+                    <div style="overflow-x: auto;">
+                        {{ dataset_preview|safe }}
+                    </div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const toggleButton = document.getElementById('toggle-preview-button');
+                        const preview = document.getElementById('dataset-preview');
+
+                        toggleButton.addEventListener('click', function () {
+                            if (preview.style.display === 'none') {
+                                preview.style.display = 'block';
+                            } else {
+                                preview.style.display = 'none';
+                            }
+                        });
+                    });
+                </script>
+
+                <!-- Graph Section -->
+                <div class="graph-section mt-4">
+                    <div class="collapse mt-3" id="graphContainer">
+                        <div class="border rounded-3 p-3 bg-light">
+                            <h5>Grafiek</h5>
+                            <div id="chart" style="height: 300px;">Grafiek komt hier.</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    {% include 'partials/footer.html' %}
+    {% include 'partials/chat_script.html' %}
+</body>
+
+</html>

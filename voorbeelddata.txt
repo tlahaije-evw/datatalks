@@ -1,0 +1,30 @@
+from app import db, User, Dataset, Chat, Message, Permission
+db.create_all()
+
+--------------------
+from app import db, User, Dataset, Chat, Message, Permission
+from werkzeug.security import generate_password_hash
+
+user1 = User(
+    username='john',
+    password=generate_password_hash('1234', method='sha256'),  # Hash wachtwoord
+    firstname='John',
+    lastname='Doe',
+    email='john@example.com'
+)
+
+user2 = User(
+    username='admin',
+    password=generate_password_hash('admin', method='sha256'),  # Hash wachtwoord
+    firstname='admin',
+    lastname='admin',
+    email='admin@admin.com'
+)
+
+dataset1 = Dataset(
+    name="DAF KPI's",
+    path='\\\\vanwijk-app08\\TCC\\Datasets\\daf-data.xlsx'
+)
+
+db.session.add_all([user1, user2, dataset1])
+db.session.commit()
